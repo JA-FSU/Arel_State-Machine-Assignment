@@ -18,6 +18,9 @@ public class EnemyScript : MonoBehaviour
     private float awareAI = 3f;
     private bool isChasing = false;
     private bool isLooking = false;
+    private bool isTurning = false;
+
+    private float yAngle;
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +43,9 @@ public class EnemyScript : MonoBehaviour
             randNum = Random.Range(1, 1000);
         }
 
+        yAngle = transform.rotation.y;
+        isTurning = Mathf.Abs(yAngle - transform.position.y) > 0.1f;
+
         if (playerDistance < awareAI)
         {
             if (playerDistance < awareAI)
@@ -56,7 +62,7 @@ public class EnemyScript : MonoBehaviour
             }
         }
 
-        if (randNum == 10 && !isChasing && !isLooking)
+        if (randNum == 10 && !isChasing && !isLooking && !isTurning)
         {
             StartCoroutine("LookAround");
         }
@@ -101,21 +107,34 @@ public class EnemyScript : MonoBehaviour
         agent.isStopped = true;
         int randTimes = Random.Range(1, 3);
 
-        float turnTime = 50.0f;
         Quaternion targetO = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y+50.0f, transform.eulerAngles.z);
-        Quaternion targetT = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y-100.0f, transform.eulerAngles.z);
+        Quaternion targetT = Quaternion.Euler(transform.eulerAngles.x, transform.eulerAngles.y-50.0f, transform.eulerAngles.z);
 
 
         if (randTimes > 0)
         {
             yield return new WaitForSeconds(1);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetO, turnTime * Time.deltaTime);
+            for (int i = 0; i < 20; i++)
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetO, 2);
+                yield return new WaitForSeconds(1/20);
+            }
             yield return new WaitForSeconds(1);
-            transform.rotation = Quaternion.Lerp(transform.rotation, targetT, turnTime * Time.deltaTime);
+            for (int i = 0; i < 40; i++)
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetT, 2);
+                yield return new WaitForSeconds(1/20);
+            }
             yield return new WaitForSeconds(2);
+            for (int i = 0; i < 20; i++)
+            {
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetO, 2);
+                yield return new WaitForSeconds(1 / 20);
+            }
+            
             transform.LookAt(agent.destination);
-
             randTimes -= 1;
+
         }
         randNum = 0;
         agent.isStopped = false;
