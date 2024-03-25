@@ -37,7 +37,7 @@ public class EnemyScript : MonoBehaviour
 
         if (randNum != 10)
         {
-            randNum = Random.Range(1, 500);
+            randNum = Random.Range(1, 700);
         }
 
         if (playerDistance < awareAI)
